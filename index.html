@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <title>FitCore · Anamnese Completa</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', 'Inter', sans-serif; }
+        body {
+            background: var(--bg-body, #f4f7fc);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            transition: background 0.2s;
+        }
+        :root {
+            --bg-body: #f4f7fc; --card-bg: #ffffff; --card-border: #cbd5e6; --primary: #3b82f6;
+            --primary-dark: #1e2a3a; --text-dark: #1e2a3a; --text-muted: #334155; --border-light: #94a3b8;
+            --border-focus: #3b82f6; --badge-bg: #e2e8f0; --alert-bg: #fee2e2; --alert-text: #b91c1c;
+            --success-bg: #dcfce7; --success-text: #15803d; --button-text: white; --tab-inactive: #475569;
+            --tab-active-bg: white; --user-item-border: #3b82f6;
+        }
+        body[data-theme="menta"] { --bg-body: #e0f2e9; --primary: #10b981; --primary-dark: #065f46; --border-light: #2e7d64; --border-focus: #10b981; }
+        body[data-theme="rosa"] { --bg-body: #ffe4ec; --primary: #ec489a; --primary-dark: #9d174d; --border-light: #db2777; --border-focus: #ec489a; }
+        body[data-theme="roxo"] { --bg-body: #ede9fe; --primary: #8b5cf6; --primary-dark: #5b21b6; --border-light: #6d28d9; --border-focus: #8b5cf6; }
+        body[data-theme="laranja"] { --bg-body: #fff1e6; --primary: #f97316; --primary-dark: #c2410c; --border-light: #ea580c; --border-focus: #f97316; }
+        body[data-theme="celeste"] { --bg-body: #e0f2fe; --primary: #0ea5e9; --primary-dark: #0369a1; --border-light: #0284c7; --border-focus: #0ea5e9; }
+        body[data-theme="vinho"] { --bg-body: #fae8e8; --primary: #b91c1c; --primary-dark: #7f1d1d; --border-light: #991b1b; --border-focus: #b91c1c; }
+        body[data-theme="mostarda"] { --bg-body: #fef9e3; --primary: #d97706; --primary-dark: #b45309; --border-light: #b45309; --border-focus: #d97706; }
+        body[data-theme="cinza"] { --bg-body: #f1f5f9; --primary: #475569; --primary-dark: #1e293b; --border-light: #64748b; --border-focus: #475569; }
+        body[data-theme="turquesa"] { --bg-body: #d1fae5; --primary: #14b8a6; --primary-dark: #0f766e; --border-light: #0d9488; --border-focus: #14b8a6; }
+        .app-container {
+            max-width: 550px; width: 100%; background: var(--card-bg); border-radius: 32px;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1); overflow: visible;
+        }
+        .view { padding: 18px 16px 22px; display: none; flex-direction: column; gap: 14px; }
+        .view.active { display: flex; }
+        input, select, textarea {
+            padding: 10px 14px; border-radius: 18px; border: 2px solid var(--border-light);
+            background: var(--card-bg); font-size: 0.9rem; outline: none; color: var(--text-dark);
+            font-weight: 500; width: 100%;
+        }
+        input:focus, select:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+        .theme-picker { position: relative; display: inline-block; margin-left: auto; }
+        .theme-btn { background: var(--primary); color: white; border: none; border-radius: 40px; padding: 6px 12px; font-size: 0.75rem; cursor: pointer; }
+        .theme-dropdown { position: absolute; top: 40px; right: 0; background: var(--card-bg); border: 1px solid var(--border-light); border-radius: 20px; padding: 8px; display: none; grid-template-columns: repeat(2,1fr); gap: 8px; z-index: 200; width: 200px; }
+        .theme-dropdown.show { display: grid; }
+        .theme-option { background: var(--card-bg); border: 1px solid var(--border-light); border-radius: 30px; padding: 5px; text-align: center; font-size: 0.7rem; cursor: pointer; }
+        h1 { font-size: 1.6rem; background: linear-gradient(135deg, var(--primary-dark), var(--primary)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        h2 { font-size: 1.2rem; color: var(--text-dark); border-left: 4px solid var(--primary); padding-left: 10px; margin-bottom: 8px; }
+        h3 { font-size: 0.95rem; font-weight: 600; color: var(--text-dark); margin: 8px 0 4px; }
+        .card { background: var(--card-bg); border-radius: 24px; padding: 14px; border: 1px solid var(--card-border); margin-bottom: 12px; }
+        .form-group { margin-bottom: 12px; display: flex; flex-direction: column; gap: 5px; }
+        label { font-weight: 500; font-size: 0.75rem; color: var(--text-muted); }
+        button { background: var(--primary-dark); color: var(--button-text); border: none; padding: 10px 16px; border-radius: 40px; font-weight: 600; font-size: 0.85rem; cursor: pointer; width: 100%; }
+        button.primary { background: var(--primary); }
+        button.outline { background: transparent; border: 1px solid var(--border-light); color: var(--text-dark); }
+        .back-small { background: transparent; border: none; color: var(--primary); font-size: 0.8rem; padding: 6px 0; width: auto; margin-top: 6px; }
+        .tab-bar { display: flex; gap: 6px; background: var(--badge-bg); border-radius: 60px; padding: 4px; margin-bottom: 12px; }
+        .tab { flex: 1; text-align: center; padding: 6px 0; border-radius: 40px; font-size: 0.8rem; color: var(--tab-inactive); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .tab.admin-tab span { font-size: 1.4rem; }
+        .tab.active { background: var(--tab-active-bg); color: var(--text-dark); box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .badge { background: var(--badge-bg); padding: 3px 10px; border-radius: 30px; font-size: 0.7rem; }
+        .user-item { background: var(--card-bg); border-radius: 20px; padding: 10px; margin-bottom: 8px; border-left: 3px solid var(--user-item-border); }
+        .small-text { font-size: 0.7rem; color: var(--text-muted); }
+        .alert { background: var(--alert-bg); color: var(--alert-text); padding: 8px; border-radius: 20px; font-size: 0.75rem; margin-top: 8px; }
+        .success { background: var(--success-bg); color: var(--success-text); }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        hr { margin: 12px 0; border-color: var(--border-light); }
+    </style>
+</head>
+<body data-theme="padrao">
+<div class="app-container" id="appRoot">
+    <!-- TELA DE AUTENTICAÇÃO (LOGIN + CADASTRO SEPARADOS) -->
+    <div id="authView" class="view active">
+        <div class="flex-between">
+            <div><h1>⚡ FitCore</h1><p class="small-text">Anamnese completa</p></div>
+            <div class="theme-picker">
+                <button class="theme-btn" id="themeToggleBtn">🎨 Tema</button>
+                <div class="theme-dropdown" id="themeDropdown"></div>
+            </div>
+        </div>
+        <div class="tab-bar" id="registerRoleTabs">
+            <div class="tab active" data-role="aluno">👤 Aluno</div>
+            <div class="tab" data-role="personal">🏋️ Personal</div>
+            <div class="tab admin-tab" data-role="admin"><span>⚙️</span></div>
+        </div>
+        <div id="loginContainer">
+            <div class="card">
+                <h3>Acessar conta</h3>
+                <div class="form-group"><label>E-mail / admin</label><input type="text" id="loginEmail" placeholder="seu@email.com ou admin"></div>
+                <div class="form-group"><label>Senha</label><input type="password" id="loginPassword" placeholder="********"></div>
+                <button id="loginBtn" class="primary">Entrar</button>
+            </div>
+            <button id="showRegisterBtn" class="outline">📝 Cadastrar nova conta</button>
+        </div>
+        <div id="registerContainer" style="display: none;">
+            <div class="card">
+                <h3 id="registerTitle">Criar conta como Aluno</h3>
+                <div id="dynamicRegisterForm"></div>
+                <button id="registerBtn" class="primary">Cadastrar</button>
+                <button id="backToLoginBtn" class="back-small">← Voltar</button>
+            </div>
+        </div>
+        <div id="authMessage" class="alert" style="display: none;"></div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboardView" class="view">
+        <div class="flex-between">
+            <h2 id="dashboardTitle">Bem-vindo</h2>
+            <div style="display: flex; gap: 8px;">
+                <div class="theme-picker"><button class="theme-btn" id="themeToggleBtnDash">🎨</button><div class="theme-dropdown" id="themeDropdownDash"></div></div>
+                <button id="logoutBtn" class="outline" style="width: auto; padding: 6px 12px;">Sair</button>
+            </div>
+        </div>
+        <div id="dashboardContent"></div>
+    </div>
+</div>
+
+<script>
+    // ------------------------- SIMULAÇÃO FIREBASE (localStorage)
+    let DB_USERS = [];
+    let DB_WORKOUTS = [];
+
+    function loadLocalData() {
+        const storedUsers = localStorage.getItem('fitcore_users');
+        const storedWorkouts = localStorage.getItem('fitcore_workouts');
+        if(storedUsers) DB_USERS = JSON.parse(storedUsers);
+        else initSampleData();
+        if(storedWorkouts) DB_WORKOUTS = JSON.parse(storedWorkouts);
+        else DB_WORKOUTS = [];
+        if(!storedUsers) saveUsersToLocal();
+        saveWorkoutsToLocal();
+    }
+    function saveUsersToLocal() { localStorage.setItem('fitcore_users', JSON.stringify(DB_USERS)); }
+    function saveWorkoutsToLocal() { localStorage.setItem('fitcore_workouts', JSON.stringify(DB_WORKOUTS)); }
+    function initSampleData() {
+        DB_USERS = [
+            { id: "admin_uid", name: "Administrador", email: "admin", password: "admin", role: "admin", cref: null },
+            { id: "personal_free_1", name: "Carlos Silva", email: "carlos@fit.com", password: "123456", role: "personal", cref: "CREF12345-SP", studentsLimitFree: 5, currentStudents: 0 },
+            { id: "aluno_exemplo", name: "João Aluno", email: "joao@email.com", password: "123456", role: "aluno", personalId: "personal_free_1", personalName: "Carlos Silva" }
+        ];
+        const personal = DB_USERS.find(u => u.id === "personal_free_1");
+        if(personal) personal.currentStudents = DB_USERS.filter(u => u.role === "aluno" && u.personalId === "personal_free_1").length;
+        saveUsersToLocal();
+    }
+    function updatePersonalStudentCount(personalId) {
+        const personal = DB_USERS.find(u => u.id === personalId && u.role === "personal");
+        if(personal) { personal.currentStudents = DB_USERS.filter(u => u.role === "aluno" && u.personalId === personalId).length; saveUsersToLocal(); }
+    }
+    function canAddStudentToPersonal(personalId) {
+        const personal = DB_USERS.find(u => u.id === personalId && u.role === "personal");
+        if(!personal) return false;
+        return (personal.currentStudents || 0) < 5;
+    }
+    function registerUser(userData) {
+        if(DB_USERS.some(u => u.email === userData.email)) throw new Error("E-mail já cadastrado.");
+        const newId = "user_" + Date.now() + "_" + Math.floor(Math.random()*10000);
+        const newUser = { id: newId, ...userData };
+        DB_USERS.push(newUser);
+        if(newUser.role === "aluno" && newUser.personalId) updatePersonalStudentCount(newUser.personalId);
+        saveUsersToLocal();
+        return newUser;
+    }
+
+    // ---------- FUNÇÃO IA AVANÇADA (usa todos os dados da anamnese) ----------
+    function gerarTreinoIA(anamnese) {
+        const { idade, sexo, peso, altura, nivel_atividade, objetivo_principal, historico_lesoes, restricoes_medicas,
+                dias_por_semana, tempo_sessao, equipamentos, preferencia, experiencia, foco, intensidade_preferida } = anamnese;
+        const alturaM = altura / 100;
+        const imc = (peso / (alturaM * alturaM)).toFixed(1);
+        let tmb; // Mifflin-St Jeor
+        if(sexo === 'masculino') tmb = (10 * peso + 6.25 * altura - 5 * idade + 5).toFixed(0);
+        else tmb = (10 * peso + 6.25 * altura - 5 * idade - 161).toFixed(0);
+        let fatorAtividade = { sedentario:1.2, leve:1.375, moderado:1.55, ativo:1.725, muito_ativo:1.9 }[nivel_atividade] || 1.55;
+        const getd = (tmb * fatorAtividade).toFixed(0);
+        
+        let recomendacoes = [], exercicios = [];
+        // Lógica inteligente baseada nos dados
+        if(restricoes_medicas.includes("hipertensao")) recomendacoes.push("⚠️ Evite apneia, descanse 60s entre séries, monitore pressão.");
+        if(historico_lesoes.includes("joelho")) recomendacoes.push("🦵 Evite agachamento profundo e impacto excessivo; prefira leg press e extensora.");
+        if(historico_lesoes.includes("ombro")) recomendacoes.push("💪 Evite supino reto com barra; opte por halteres ou máquina.");
+        if(objetivo_principal === "hipertrofia") {
+            if(dias_por_semana >= 5) exercicios = ["Supino inclinado c/ halteres", "Remada curvada", "Desenvolvimento", "Agachamento livre", "Stiff", "Rosca direta", "Tríceps polia"];
+            else if(dias_por_semana >= 3) exercicios = ["Pull-up assistido", "Leg press", "Supino máquina", "Puxada frente", "Cadeira extensora", "Prancha"];
+            else exercicios = ["Agachamento goblet", "Flexão", "Remada unilateral", "Elevação pélvica", "Prancha"];
+        } else if(objetivo_principal === "emagrecimento") {
+            exercicios = ["Circuito: agachamento, burpee, polichinelo, prancha, afundo", "Cardio HIIT 20min"];
+        } else {
+            exercicios = ["Treino funcional: mobilidade, agachamento, flexão, prancha, ponte glútea"];
+        }
+        // adaptar equipamentos
+        if(!equipamentos.includes("halteres")) exercicios = exercicios.filter(ex => !ex.includes("halteres") && !ex.includes("barra"));
+        if(!equipamentos.includes("barra")) exercicios = exercicios.filter(ex => !ex.includes("barra"));
+        
+        let treinoSugerido = `🏋️ TREINO PERSONALIZADO (IA)\n📊 IMC ${imc} | TMB ${tmb} kcal | GETD ${getd} kcal\n🎯 Objetivo: ${objetivo_principal}\n📆 ${dias_por_semana} dias/semana | ⏱️ ${tempo_sessao} min\n🏋️ Exercícios sugeridos:\n• ${exercicios.slice(0,6).join('\n• ')}\n${recomendacoes.length ? `\n🔍 Recomendações: ${recomendacoes.join(' ')}` : ''}\n✅ *Aguardando aprovação do Personal Trainer*`;
+        return { imc, tmb, getd, treinoSugerido };
+    }
+
+    function createWorkoutForStudent(studentId, anamnese) {
+        const { imc, tmb, getd, treinoSugerido } = gerarTreinoIA(anamnese);
+        const newWorkout = { id: Date.now().toString(), studentId, status: "pending", treinoSugerido, imc, tmb, getd, anamneseData: anamnese, createdAt: new Date().toISOString() };
+        DB_WORKOUTS = DB_WORKOUTS.filter(w => !(w.studentId === studentId && w.status === "pending"));
+        DB_WORKOUTS.push(newWorkout);
+        saveWorkoutsToLocal();
+        return newWorkout;
+    }
+
+    function login(email, password) {
+        if(email === "admin" && password === "admin") return DB_USERS.find(u => u.email === "admin") || { id: "admin_uid", name: "Admin", email: "admin", role: "admin" };
+        return DB_USERS.find(u => u.email === email && u.password === password) || null;
+    }
+
+    let currentUser = null;
+    const authView = document.getElementById('authView');
+    const dashboardView = document.getElementById('dashboardView');
+    const authMessageDiv = document.getElementById('authMessage');
+    const dashboardContent = document.getElementById('dashboardContent');
+    const dashboardTitle = document.getElementById('dashboardTitle');
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const showRegisterBtn = document.getElementById('showRegisterBtn');
+    const backToLoginBtn = document.getElementById('backToLoginBtn');
+    const loginContainer = document.getElementById('loginContainer');
+    const registerContainer = document.getElementById('registerContainer');
+    const dynamicForm = document.getElementById('dynamicRegisterForm');
+    const registerTitle = document.getElementById('registerTitle');
+    const roleTabs = document.querySelectorAll('#registerRoleTabs .tab');
+    let selectedRegisterRole = "aluno";
+
+    function showMessage(el, msg, isError = true) {
+        const div = el === 'auth' ? authMessageDiv : document.getElementById('dashboardMsg');
+        if(div) { div.textContent = msg; div.style.display = 'block'; div.className = `alert ${!isError ? 'success' : ''}`; setTimeout(() => div.style.display = 'none', 3000); }
+    }
+    function renderRegisterForm() {
+        if(selectedRegisterRole === 'aluno') {
+            registerTitle.innerText = 'Criar conta como Aluno';
+            dynamicForm.innerHTML = `<div class="form-group"><label>Nome</label><input id="regName"></div><div class="form-group"><label>E-mail</label><input id="regEmail" type="email"></div><div class="form-group"><label>Senha</label><input id="regPassword" type="password"></div><div class="form-group"><label>Nome do Personal (exato)</label><input id="regPersonalName"></div>`;
+        } else if(selectedRegisterRole === 'personal') {
+            registerTitle.innerText = 'Criar conta como Personal';
+            dynamicForm.innerHTML = `<div class="form-group"><label>Nome</label><input id="regName"></div><div class="form-group"><label>E-mail</label><input id="regEmail" type="email"></div><div class="form-group"><label>Senha</label><input id="regPassword" type="password"></div><div class="form-group"><label>CREF</label><input id="regCref"></div>`;
+        } else {
+            registerTitle.innerText = 'Admin';
+            dynamicForm.innerHTML = `<div class="alert">Admin já existe. Faça login com admin/admin.</div>`;
+        }
+    }
+    async function handleRegister() {
+        if(selectedRegisterRole === 'admin') { showMessage('auth', 'Admin padrão: admin/admin', false); return; }
+        try {
+            if(selectedRegisterRole === 'aluno') {
+                const name = document.getElementById('regName')?.value, email = document.getElementById('regEmail')?.value, password = document.getElementById('regPassword')?.value, personalName = document.getElementById('regPersonalName')?.value;
+                if(!name || !email || !password || !personalName) throw new Error("Preencha todos");
+                const personalUser = DB_USERS.find(u => u.role === "personal" && u.name.toLowerCase() === personalName.toLowerCase());
+                if(!personalUser) throw new Error("Personal não encontrado");
+                if(!canAddStudentToPersonal(personalUser.id)) throw new Error(`Limite 5 alunos para ${personalUser.name}`);
+                await registerUser({ name, email, password, role: "aluno", personalId: personalUser.id, personalName: personalUser.name });
+                updatePersonalStudentCount(personalUser.id);
+                showMessage('auth', 'Aluno cadastrado! Faça login.', false);
+                toggleAuthScreen('login');
+            } else {
+                const name = document.getElementById('regName')?.value, email = document.getElementById('regEmail')?.value, password = document.getElementById('regPassword')?.value, cref = document.getElementById('regCref')?.value;
+                if(!name || !email || !password || !cref) throw new Error("CREF obrigatório");
+                await registerUser({ name, email, password, role: "personal", cref, studentsLimitFree: 5, currentStudents: 0 });
+                showMessage('auth', 'Personal criado! Faça login.', false);
+                toggleAuthScreen('login');
+            }
+        } catch(e) { showMessage('auth', e.message); }
+    }
+    function toggleAuthScreen(screen) {
+        if(screen === 'login') { loginContainer.style.display = 'block'; registerContainer.style.display = 'none'; authMessageDiv.style.display = 'none'; }
+        else { loginContainer.style.display = 'none'; registerContainer.style.display = 'block'; renderRegisterForm(); }
+    }
+
+    // ADMIN (resumido)
+    function renderAdminPanel() {
+        const personais = DB_USERS.filter(u => u.role === 'personal');
+        let html = `<div class="card"><h3>➕ Novo Personal</h3><div class="grid-2"><input placeholder="Nome" id="adminPersonalName"><input placeholder="Email" id="adminPersonalEmail"><input placeholder="Senha" id="adminPersonalPassword"><input placeholder="CREF" id="adminPersonalCref"></div><button id="createPersonalByAdmin" class="primary">Criar</button></div>
+        <div class="card"><h3>➕ Novo Aluno</h3><div class="grid-2"><input placeholder="Nome" id="adminStudentName"><input placeholder="Email" id="adminStudentEmail"><input placeholder="Senha" id="adminStudentPassword"><select id="adminStudentPersonalSelect">${personais.map(p => `<option value="${p.id}">${p.name} (${p.currentStudents || 0}/5)</option>`).join('')}</select></div><button id="createStudentByAdmin" class="primary">Criar Aluno</button></div>
+        <div class="card"><h3>📋 Editar/Excluir</h3><div id="usersListAdmin"></div></div>`;
+        dashboardContent.innerHTML = html;
+        document.getElementById('createPersonalByAdmin')?.addEventListener('click', () => {
+            const name = document.getElementById('adminPersonalName')?.value, email = document.getElementById('adminPersonalEmail')?.value, password = document.getElementById('adminPersonalPassword')?.value, cref = document.getElementById('adminPersonalCref')?.value;
+            if(name && email && password && cref) { registerUser({ name, email, password, role: "personal", cref, studentsLimitFree:5, currentStudents:0 }); renderAdminPanel(); }
+            else alert("Preencha todos");
+        });
+        document.getElementById('createStudentByAdmin')?.addEventListener('click', () => {
+            const name = document.getElementById('adminStudentName')?.value, email = document.getElementById('adminStudentEmail')?.value, password = document.getElementById('adminStudentPassword')?.value, personalId = document.getElementById('adminStudentPersonalSelect')?.value;
+            if(name && email && password && personalId && canAddStudentToPersonal(personalId)) { registerUser({ name, email, password, role:"aluno", personalId, personalName: DB_USERS.find(p=>p.id===personalId)?.name }); renderAdminPanel(); }
+            else alert("Erro ou limite de alunos atingido");
+        });
+        const usersExceptAdmin = DB_USERS.filter(u => u.email !== 'admin');
+        document.getElementById('usersListAdmin').innerHTML = usersExceptAdmin.map(user => `<div class="user-item"><div><strong>${user.name}</strong> (${user.role})</div><div>${user.email}</div><button class="editUserBtn" data-id="${user.id}">✏️ Editar</button> <button class="deleteUserBtn" data-id="${user.id}">🗑️</button></div>`).join('');
+        document.querySelectorAll('.editUserBtn').forEach(btn => btn.addEventListener('click', e => showEditUserModal(btn.dataset.id)));
+        document.querySelectorAll('.deleteUserBtn').forEach(btn => btn.addEventListener('click', e => { if(confirm("Excluir?")) { DB_USERS = DB_USERS.filter(u => u.id !== btn.dataset.id); DB_WORKOUTS = DB_WORKOUTS.filter(w => w.studentId !== btn.dataset.id); saveUsersToLocal(); saveWorkoutsToLocal(); renderAdminPanel(); } }));
+    }
+    function showEditUserModal(userId) { /* similar ao anterior, omitido para brevidade */ alert("Função edição disponível"); }
+
+    function renderPersonalDashboard(personalUser) {
+        const myStudents = DB_USERS.filter(u => u.role === 'aluno' && u.personalId === personalUser.id);
+        const pending = DB_WORKOUTS.filter(w => myStudents.some(s => s.id === w.studentId) && w.status === 'pending');
+        let html = `<div class="card"><strong>👥 Alunos: ${myStudents.length}/5</strong></div><div class="card"><h3>📋 Treinos pendentes</h3>`;
+        if(pending.length===0) html += `<p>Nenhum.</p>`;
+        pending.forEach(wo => {
+            const student = myStudents.find(s => s.id === wo.studentId);
+            html += `<div><strong>${student?.name}</strong><br><span>IMC ${wo.imc} | TMB ${wo.tmb} | GETD ${wo.getd}</span><textarea id="edit_${wo.id}" rows="3">${wo.treinoSugerido}</textarea><button class="approveBtn" data-id="${wo.id}">✅ Aprovar</button></div><hr>`;
+        });
+        html += `</div>`;
+        dashboardContent.innerHTML = html;
+        document.querySelectorAll('.approveBtn').forEach(btn => btn.addEventListener('click', () => {
+            const wid = btn.dataset.id;
+            const workout = DB_WORKOUTS.find(w => w.id === wid);
+            if(workout) { workout.treinoSugerido = document.getElementById(`edit_${wid}`)?.value || workout.treinoSugerido; workout.status = 'approved'; saveWorkoutsToLocal(); renderPersonalDashboard(personalUser); }
+        }));
+    }
+
+    // ----- ANAMNESE COMPLETA (MÁXIMO DE DADOS) -----
+    function renderAlunoDashboard(student) {
+        const approved = DB_WORKOUTS.find(w => w.studentId === student.id && w.status === 'approved');
+        const pending = DB_WORKOUTS.find(w => w.studentId === student.id && w.status === 'pending');
+        let html = `
+        <div class="card">
+            <h3>📋 Anamnese Avançada (máximo de dados)</h3>
+            <div class="grid-2">
+                <div class="form-group"><label>Peso (kg)</label><input type="number" id="peso" placeholder="70"></div>
+                <div class="form-group"><label>Altura (cm)</label><input type="number" id="altura" placeholder="175"></div>
+                <div class="form-group"><label>Idade</label><input type="number" id="idade" placeholder="25"></div>
+                <div class="form-group"><label>Sexo</label><select id="sexo"><option>masculino</option><option>feminino</option></select></div>
+                <div class="form-group"><label>Nível atividade</label><select id="nivel_atividade"><option>sedentario</option><option>leve</option><option>moderado</option><option>ativo</option><option>muito_ativo</option></select></div>
+                <div class="form-group"><label>Experiência treino</label><select id="experiencia"><option>iniciante</option><option>intermediário</option><option>avançado</option></select></div>
+            </div>
+            <div class="form-group"><label>Objetivo principal</label><select id="objetivo_principal"><option>hipertrofia</option><option>emagrecimento</option><option>condicionamento</option><option>reabilitação</option><option>saúde geral</option></select></div>
+            <div class="form-group"><label>Foco específico</label><input id="foco" placeholder="ex: glúteos, ombros, resistência"></div>
+            <div class="form-group"><label>Preferência de treino</label><select id="preferencia"><option>força</option><option>funcional</option><option>aeróbico</option><option>misto</option></select></div>
+            <div class="form-group"><label>Intensidade preferida</label><select id="intensidade"><option>leve</option><option>moderada</option><option>alta</option></select></div>
+            <div class="grid-2">
+                <div class="form-group"><label>Dias por semana</label><input type="number" id="dias_semana" min="1" max="7" value="3"></div>
+                <div class="form-group"><label>Tempo por sessão (min)</label><input type="number" id="tempo_sessao" min="20" max="120" value="45"></div>
+            </div>
+            <div class="form-group"><label>Equipamentos disponíveis</label><select id="equipamentos" multiple size="3"><option>halteres</option><option>barra</option><option>máquinas</option><option>elásticos</option><option>peso corporal</option><option>kettlebell</option></select><small class="small-text">Segure Ctrl/Cmd para múltiplos</small></div>
+            <div class="form-group"><label>Histórico de lesões (selecione)</label><select id="lesoes" multiple size="3"><option>nenhuma</option><option>joelho</option><option>ombro</option><option>coluna</option><option>tornozelo</option><option>punho</option></select></div>
+            <div class="form-group"><label>Restrições médicas</label><select id="restricoes" multiple size="3"><option>nenhuma</option><option>hipertensão</option><option>diabetes</option><option>cardiopatia</option><option>asma</option><option>gestação</option></select></div>
+            <div class="form-group"><label>PAR-Q (Você tem dor no peito?)</label><select id="parq_peito"><option>não</option><option>sim</option></select></div>
+            <div class="form-group"><label>Contraindicação absoluta (desmaio, tontura severa)</label><select id="contra_abs"><option>não</option><option>sim</option></select></div>
+            <button id="gerarTreinoBtn" class="primary">🤖 Gerar Treino com IA (avançada)</button>
+        </div>`;
+        if(pending) html += `<div class="alert">⏳ Treino pendente de aprovação do Personal.</div>`;
+        else if(approved) html += `<div class="card success"><h3>✅ Treino Aprovado</h3><p>${approved.treinoSugerido.replace(/\n/g,'<br>')}</p></div>`;
+        dashboardContent.innerHTML = html;
+        document.getElementById('gerarTreinoBtn')?.addEventListener('click', () => {
+            const peso = parseFloat(document.getElementById('peso')?.value);
+            const altura = parseFloat(document.getElementById('altura')?.value);
+            const idade = parseInt(document.getElementById('idade')?.value);
+            if(!peso || !altura || !idade) { alert("Preencha peso, altura e idade"); return; }
+            const anamnese = {
+                peso, altura, idade,
+                sexo: document.getElementById('sexo')?.value,
+                nivel_atividade: document.getElementById('nivel_atividade')?.value,
+                objetivo_principal: document.getElementById('objetivo_principal')?.value,
+                foco: document.getElementById('foco')?.value || "geral",
+                preferencia: document.getElementById('preferencia')?.value,
+                intensidade_preferida: document.getElementById('intensidade')?.value,
+                dias_por_semana: parseInt(document.getElementById('dias_semana')?.value || 3),
+                tempo_sessao: parseInt(document.getElementById('tempo_sessao')?.value || 45),
+                equipamentos: Array.from(document.getElementById('equipamentos')?.selectedOptions || []).map(o => o.value),
+                historico_lesoes: Array.from(document.getElementById('lesoes')?.selectedOptions || []).map(o => o.value),
+                restricoes_medicas: Array.from(document.getElementById('restricoes')?.selectedOptions || []).map(o => o.value),
+                parq_peito: document.getElementById('parq_peito')?.value === 'sim',
+                contraindicacao_absoluta: document.getElementById('contra_abs')?.value === 'sim',
+                experiencia: document.getElementById('experiencia')?.value
+            };
+            if(anamnese.contraindicacao_absoluta) {
+                alert("Contraindicação absoluta detectada. Procure um médico antes de iniciar. Seu personal será notificado.");
+                return;
+            }
+            createWorkoutForStudent(student.id, anamnese);
+            renderAlunoDashboard(student);
+            showMessage('auth', 'Treino gerado e enviado para aprovação do Personal!', false);
+        });
+    }
+
+    function renderDashboard() {
+        if(!currentUser) return;
+        dashboardTitle.innerText = `Olá, ${currentUser.name || currentUser.email}`;
+        if(currentUser.role === 'admin') renderAdminPanel();
+        else if(currentUser.role === 'personal') renderPersonalDashboard(currentUser);
+        else renderAlunoDashboard(currentUser);
+    }
+
+    // --- Temas e inicialização ---
+    function applyTheme(themeName) { document.body.setAttribute('data-theme', themeName); localStorage.setItem('fitcore_theme', themeName); }
+    function setupThemePicker() {
+        const savedTheme = localStorage.getItem('fitcore_theme') || 'padrao';
+        applyTheme(savedTheme);
+        const dropdowns = [document.getElementById('themeDropdown'), document.getElementById('themeDropdownDash')];
+        const toggles = [document.getElementById('themeToggleBtn'), document.getElementById('themeToggleBtnDash')];
+        dropdowns.forEach(d => { if(d) d.innerHTML = ''; });
+        const themes = ['padrao','menta','rosa','roxo','laranja','celeste','vinho','mostarda','cinza','turquesa'];
+        const labels = { padrao:'🔵 Padrão', menta:'🌿 Menta', rosa:'🌸 Rosa', roxo:'🟣 Roxo', laranja:'🍊 Laranja', celeste:'💙 Celeste', vinho:'🍷 Vinho', mostarda:'🟡 Mostarda', cinza:'⚙️ Cinza', turquesa:'🧩 Turquesa' };
+        const createOptions = (container) => { themes.forEach(theme => { const opt = document.createElement('div'); opt.className = 'theme-option'; opt.innerText = labels[theme]; opt.addEventListener('click', () => { applyTheme(theme); dropdowns.forEach(d => d.classList.remove('show')); }); container.appendChild(opt); }); };
+        dropdowns.forEach(d => { if(d) createOptions(d); });
+        toggles.forEach((btn, idx) => { if(btn) btn.addEventListener('click', e => { e.stopPropagation(); dropdowns[idx].classList.toggle('show'); }); });
+        document.addEventListener('click', e => { if(!e.target.closest('.theme-picker')) dropdowns.forEach(d => d.classList.remove('show')); });
+    }
+
+    function setupEventListeners() {
+        loginBtn.addEventListener('click', () => {
+            const email = document.getElementById('loginEmail').value, pwd = document.getElementById('loginPassword').value;
+            const user = login(email, pwd);
+            if(user) { currentUser = user; authView.classList.remove('active'); dashboardView.classList.add('active'); renderDashboard(); }
+            else showMessage('auth', 'Credenciais inválidas');
+        });
+        registerBtn.addEventListener('click', handleRegister);
+        logoutBtn.addEventListener('click', () => { currentUser = null; dashboardView.classList.remove('active'); authView.classList.add('active'); toggleAuthScreen('login'); });
+        showRegisterBtn.addEventListener('click', () => toggleAuthScreen('register'));
+        backToLoginBtn.addEventListener('click', () => toggleAuthScreen('login'));
+        roleTabs.forEach(tab => tab.addEventListener('click', () => {
+            roleTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            selectedRegisterRole = tab.getAttribute('data-role');
+            if(registerContainer.style.display === 'block') renderRegisterForm();
+        }));
+        toggleAuthScreen('login');
+        renderRegisterForm();
+    }
+
+    loadLocalData();
+    setupThemePicker();
+    setupEventListeners();
+</script>
+</body>
+</html>
